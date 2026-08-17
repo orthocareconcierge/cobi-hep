@@ -346,6 +346,29 @@ body {
   #page-report .page-header { display: none !important; }
   #print-area { margin: 0 !important; border-radius: 0 !important; }
 }
+.str-zone{background:var(--charcoal);border:1px solid rgba(201,168,76,.22);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.str-goal{background:var(--dark);border:1px solid rgba(201,168,76,.45);border-radius:12px;padding:12px 14px;margin-bottom:14px;}
+.str-card{background:var(--charcoal);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+.str-head{display:flex;align-items:center;gap:11px;padding:12px 13px;}
+.str-circ{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.str-circ.done{background:var(--green);border-color:var(--green);}
+.str-name{font-size:14px;color:var(--white);}
+.str-meta{font-size:11px;color:var(--gold);margin-top:2px;}
+.str-body{display:none;padding:0 13px 13px 44px;}
+.str-body.open{display:block;}
+.str-body ul{margin:0;padding:0;}
+.str-body li{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:4px;list-style:none;position:relative;padding-left:13px;}
+.str-body li:before{content:'';position:absolute;left:2px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--gold);}
+.str-log{margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.08);}
+.str-loghd{font-size:9px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:7px;}
+.str-setrow{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.str-setrow span{font-size:11px;color:var(--muted);width:40px;}
+.str-in{background:var(--black);border:1px solid rgba(255,255,255,.14);border-radius:7px;color:#fff;font-family:'Jost',sans-serif;font-size:12px;padding:7px 8px;width:100%;}
+.str-addset{background:none;border:1px dashed rgba(201,168,76,.5);color:var(--gold-light);font-family:'Jost',sans-serif;font-size:11px;border-radius:7px;padding:6px 10px;cursor:pointer;}
+.str-wgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.str-wgrid label{font-size:10px;color:var(--muted);display:block;margin-bottom:3px;}
+.str-sel{width:100%;background:var(--charcoal);color:#fff;border:1px solid rgba(201,168,76,.5);border-radius:10px;padding:11px 12px;font-family:'Jost',sans-serif;font-size:14px;margin-bottom:12px;-webkit-appearance:none;appearance:none;}
+.str-lbl{font-size:9px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin:16px 0 6px;}
 </style>
 </head>
 <body>
@@ -369,10 +392,10 @@ body {
       <h3>My Program</h3>
       <p>Today's exercises</p>
     </div>
-    <div class="nav-card" onclick="showPage('program'); showProgramTab('progress')">
-      <span class="nav-icon">&#128202;</span>
-      <h3>My Progress</h3>
-      <p>Consistency &amp; logs</p>
+    <div class="nav-card" onclick="showPage('strength')">
+      <span class="nav-icon">&#128170;</span>
+      <h3>Strength</h3>
+      <p>Training &amp; walking</p>
     </div>
     <div class="nav-card" onclick="showPage('goals')">
       <span class="nav-icon">&#127919;</span>
@@ -427,6 +450,16 @@ body {
 
     <div id="progress-tab" style="display:none;"></div>
   </div>
+</div>
+
+<!-- ==================== STRENGTH ==================== -->
+<div id="page-strength" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="showHome()">&#8592; Home</button>
+    <h2>Strength Training</h2>
+    <p class="page-sub">Strength and walking</p>
+  </div>
+  <div class="page-content" id="strength-content"></div>
 </div>
 
 <!-- ==================== GOALS ==================== -->
@@ -627,6 +660,7 @@ function showPage(id) {
   document.getElementById('bottom-nav').style.display = 'flex';
   if (id === 'program') renderToday();
   if (id === 'goals') renderGoals();
+  if (id === 'strength') renderStrength();
   if (id === 'precautions') renderPrecautions();
   if (id === 'report') renderReport();
   window.scrollTo(0, 0);
@@ -1022,6 +1056,76 @@ function buildReportLogs() {
       `<div class="rep-line" style="font-size:11.5px;color:#6B6356;">Set ${i + 1}: ${s.reps || '-'} reps &nbsp;&middot;&nbsp; ${s.load || '-'}</div>`).join('')}
   </div>`).join('');
 }
+
+
+// ---------- STRENGTH TRAINING SECTION ----------
+const STR = {
+  hrZones: [['1','Recovery','83 to 99'],['2','Aerobic base','99 to 116'],['3','Aerobic','116 to 132'],['4','Threshold','132 to 149'],['5','Max','149 to 165']],
+  dailyGoal: '16 minutes in Zone 3 to 4 (116 to 149 bpm) every day, from your walk or your strength session.',
+  warmup: { rx:'about 5 min · tap for instructions', cues:['Marching in place, 30 sec.','Ankle circles and pumps, 10 each way.','Leg swings, 10 each leg.','Arm circles, 10 each way.','Bodyweight sit-to-stands, 10 reps.','Band pull-aparts, 10 reps.'] },
+  cooldown: { rx:'about 5 min · tap for instructions', cues:['Calf and soleus stretch, 30 sec each.','Hamstring stretch, 30 sec each.','Quad stretch, 30 sec each.','Hip flexor stretch, 30 sec each.','Chest and shoulder stretch, 30 sec each.'] },
+  walk: { rx:'progress from 2 mi · Zone 2 to 3 · log from watch', cues:['Walk 4 times a week, starting at 2 miles and adding a little distance each week.','Keep an easy, steady pace in Zone 2 to 3 (99 to 132 bpm).','To hit the daily goal, push part of a walk into Zone 3 to 4.','Log your steps, distance, time, and calories from your Apple Watch.'] },
+  workouts: {
+    upper: { label:'Upper Body', ex:[
+      ['DB Overhead Press','10 to 15 reps · 3 to 4 sets · 5 to 10 lbs',['Hold a dumbbell in each hand at shoulder height, palms forward.','Press straight overhead until your arms are long, without arching your low back.','Lower with control to shoulder height.','Keep your ribs down and core gently braced.']],
+      ['Bent-Over DB Row','10 to 15 reps · 3 to 4 sets · 10 lbs',['Hinge forward with a long, flat back, a dumbbell in each hand hanging down.','Draw your elbows back and up, squeezing your shoulder blades together.','Keep your shoulders down and your neck relaxed.','Lower slowly. Do not round your back.']],
+      ['Band Pull-Aparts','12 to 15 reps · 3 to 4 sets',['Hold a band out in front at shoulder height, arms straight.','Pull it apart, drawing your hands out to the sides and squeezing your shoulder blades.','Keep your arms straight and shoulders down.','Return slowly.']],
+      ['Biceps Curl and Overhead Triceps','10 to 15 reps each · 3 to 4 sets · 5 lbs',['For the curl, palms up, bend your elbows to bring the weights to your shoulders, then lower slowly.','For the triceps, hold one weight overhead with both hands, elbows up.','Bend your elbows to lower it behind your head, then straighten.','Keep your upper arms still and core braced.']]
+    ]},
+    lower: { label:'Lower Body', ex:[
+      ['Goblet Squat','10 to 15 reps · 3 to 4 sets · 10 lbs',['Hold one dumbbell against your chest, feet shoulder-width apart.','Sit your hips back and down, chest up and heels down.','Go as low as is comfortable, knees tracking over your toes.','Drive through your heels to stand, squeezing your glutes.']],
+      ['Assisted Single-Leg Sit-to-Stand','8 to 10 reps per side · 3 to 4 sets',['Sit on a sturdy chair and prop the toe of your other leg lightly on the floor in front for light assist.','Lean forward and push up mostly through your working leg.','Use the propped toe only as much as you need.','Lower slowly. Switch sides after all reps.']],
+      ['Weighted Step-Ups','10 reps per side · 3 to 4 sets · 5 to 10 lbs',['Stand facing your step, a dumbbell in each hand.','Step up, driving through that heel to bring your body up onto the step.','Stand tall, then step down slowly.','Keep your knee over your toes. Switch sides after all reps.']],
+      ['Kickstand RDL','10 reps per side · 3 to 4 sets · 10 lbs',['Working leg forward, other toes lightly down behind like a kickstand, about 70 percent of your weight on the front leg.','Hinge at the hips, sending them back and lowering the weight with a flat back.','Keep the front knee soft and the back toes light for balance only.','Drive through the front heel to stand. Switch sides.']],
+      ['Calf Raises','12 to 15 reps · 3 to 4 sets',['Stand tall holding a counter, feet hip-width apart.','Rise up onto the balls of both feet, lifting your heels.','Hold briefly, then lower slowly.','Ease off if the plantar fascia flares.']]
+    ]},
+    full: { label:'Full Body / Core', ex:[
+      ['DB Squat-to-Press','10 to 12 reps · 3 to 4 sets · 5 lbs',['Hold a dumbbell in each hand at your shoulders, feet shoulder-width apart.','Squat down, hips back and chest up.','As you stand, press the weights overhead in one motion.','Lower to your shoulders as you drop into the next squat.']],
+      ['Dead Bug','8 to 10 reps per side · 3 to 4 sets',['Lie on your back, arms up, hips and knees bent to 90 degrees.','Press your low back gently into the floor.','Slowly lower the opposite arm and leg, keeping your back flat.','Return with control and switch sides.']],
+      ['Bird Dog','8 to 10 reps per side · 3 to 4 sets',['On hands and knees, hands under shoulders and knees under hips.','Reach one arm forward and the opposite leg back, long and level.','Keep your hips level and core braced, no sagging or twisting.','Return with control and switch sides.']],
+      ['Russian Twists','10 to 12 reps per side · 3 sets · 3 to 5 lbs',['Sit with your knees bent, leaning back slightly to a tall, strong position, a light weight at your chest.','Rotate your trunk to one side, bringing the weight toward the floor by your hip.','Rotate smoothly to the other side, moving from the trunk.','Keep your chest up and low back long. Keep your heels down to make it easier.']],
+      ['Plank','20 to 40 sec · 3 sets',['Set up on your forearms and toes, elbows under your shoulders, or on your knees for an easier version.','Lift your hips into a straight line from head to heels.','Brace your core and squeeze your glutes, no sagging or piking.','Hold and breathe, then rest.']]
+    ]}
+  }
+};
+function strZones(){ return STR.hrZones.map(function(z){ var hot=(z[0]==='3'||z[0]==='4'); return '<div style="display:flex;justify-content:space-between;font-size:12px;line-height:1.9;color:'+(hot?'var(--gold-light)':'var(--muted)')+';"><span>Zone '+z[0]+' · '+z[1]+'</span><span>'+z[2]+' bpm</span></div>'; }).join(''); }
+function strSetRow(base,si,s){ return '<div class="str-setrow"><span>Set '+(si+1)+'</span><input class="str-in" type="number" inputmode="numeric" placeholder="reps" value="'+(s.reps||'')+'" onchange="strSet(\''+base+'\','+si+',\'reps\',this.value)"><input class="str-in" placeholder="lbs" value="'+(s.load||'')+'" onchange="strSet(\''+base+'\','+si+',\'load\',this.value)"></div>'; }
+function strLog(type,base){
+  if(type==='none') return '';
+  if(type==='walk'){
+    function f(lbl,key){ return '<div><label>'+lbl+'</label><input class="str-in" value="'+(hepLog[base+'-'+key]||'')+'" onchange="strField(\''+base+'\',\''+key+'\',this.value)"></div>'; }
+    return '<div class="str-log"><div class="str-loghd">Log from your Apple Watch</div><div class="str-wgrid">'+f('Steps','steps')+f('Distance (mi)','distance')+f('Time (min)','time')+f('Calories','calories')+'</div></div>';
+  }
+  var sets=hepLog[base]||[{}];
+  return '<div class="str-log"><div class="str-loghd">Log Sets · Reps &amp; Weight</div><div id="str-sets-'+base+'">'+sets.map(function(s,si){return strSetRow(base,si,s);}).join('')+'</div><button class="str-addset" onclick="strAddSet(\''+base+'\')">+ Add set</button></div>';
+}
+function strRow(prefix,i,name,rx,cues,type){
+  var base=prefix+'-'+todayKey()+'-ex'+i;
+  var done=!!hepLog[base+'-done'];
+  var cid='str-'+prefix+'-'+i;
+  var body='<ul>'+cues.map(function(c){return '<li>'+c+'</li>';}).join('')+'</ul>'+strLog(type,base);
+  return '<div class="str-card"><div class="str-head"><div class="str-circ'+(done?' done':'')+'" onclick="strCheck(event,\''+base+'\',this)">'+(done?'<span style="color:var(--black);font-size:12px;">&#10003;</span>':'')+'</div><div style="flex:1;cursor:pointer;" onclick="strToggle(\''+cid+'\')"><div class="str-name">'+name+'</div><div class="str-meta">'+rx+'</div></div></div><div class="str-body" id="'+cid+'">'+body+'</div></div>';
+}
+function strWorkoutHTML(wid){ return STR.workouts[wid].ex.map(function(e,i){ return strRow(wid,i,e[0],e[1],e[2],'sets'); }).join(''); }
+function strSelect(wid){ hepLog['str-sel']=wid; saveAll(); document.getElementById('str-workout').innerHTML=strWorkoutHTML(wid); }
+function renderStrength(){
+  var sel=hepLog['str-sel']||'upper';
+  var h='';
+  h+='<div class="str-zone"><div class="str-loghd">Heart Rate Zones · Max ~165</div>'+strZones()+'</div>';
+  h+='<div class="str-goal"><div class="str-loghd" style="color:var(--gold-light)">Daily Goal</div><div style="font-size:13px;color:#fff;line-height:1.5;">'+STR.dailyGoal+'</div></div>';
+  h+='<div class="str-lbl">Warm-up</div>'+strRow('warm',0,'Warm-Up',STR.warmup.rx,STR.warmup.cues,'none');
+  h+='<div class="str-lbl">Pick today\'s strength workout</div>';
+  h+='<select class="str-sel" onchange="strSelect(this.value)">'+Object.keys(STR.workouts).map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+STR.workouts[k].label+'</option>';}).join('')+'</select>';
+  h+='<div id="str-workout">'+strWorkoutHTML(sel)+'</div>';
+  h+='<div class="str-lbl">Walk, every day</div>'+strRow('walk',0,'Daily Walk',STR.walk.rx,STR.walk.cues,'walk');
+  h+='<div class="str-lbl">Cool-down</div>'+strRow('cool',0,'Cool-Down',STR.cooldown.rx,STR.cooldown.cues,'none');
+  document.getElementById('strength-content').innerHTML=h;
+}
+function strToggle(cid){ var e=document.getElementById(cid); if(e) e.classList.toggle('open'); }
+function strCheck(ev,base,el){ ev.stopPropagation(); hepLog[base+'-done']=!hepLog[base+'-done']; var d=!!hepLog[base+'-done']; el.classList.toggle('done',d); el.innerHTML=d?'<span style="color:var(--black);font-size:12px;">&#10003;</span>':''; saveAll(); }
+function strField(base,key,val){ hepLog[base+'-'+key]=val; saveAll(); }
+function strSet(base,si,f,val){ if(!hepLog[base]) hepLog[base]=[]; if(!hepLog[base][si]) hepLog[base][si]={}; hepLog[base][si][f]=val; saveAll(); }
+function strAddSet(base){ if(!hepLog[base]) hepLog[base]=[{}]; hepLog[base].push({}); document.getElementById('str-sets-'+base).insertAdjacentHTML('beforeend',strSetRow(base,hepLog[base].length-1,{})); saveAll(); }
 
 // ---------- EXPORT (text fallback) ----------
 function exportLog() {
