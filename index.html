@@ -359,6 +359,8 @@ body {
 .str-body ul{margin:0;padding:0;}
 .str-body li{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:4px;list-style:none;position:relative;padding-left:13px;}
 .str-body li:before{content:'';position:absolute;left:2px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--gold);}
+.str-vid{max-width:260px;margin:0 auto 10px;border-radius:8px;overflow:hidden;background:#000;}
+.str-vid video{width:100%;max-height:60vh;display:block;}
 .str-log{margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.08);}
 .str-loghd{font-size:9px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:7px;}
 .str-setrow{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
@@ -1076,7 +1078,7 @@ const STR = {
       ['Goblet Squat','10 to 15 reps · 3 to 4 sets · 10 lbs',['Hold one dumbbell against your chest, feet shoulder-width apart.','Sit your hips back and down, chest up and heels down.','Go as low as is comfortable, knees tracking over your toes.','Drive through your heels to stand, squeezing your glutes.']],
       ['Assisted Single-Leg Sit-to-Stand','8 to 10 reps per side · 3 to 4 sets',['Sit on a sturdy chair and prop the toe of your other leg lightly on the floor in front for light assist.','Lean forward and push up mostly through your working leg.','Use the propped toe only as much as you need.','Lower slowly. Switch sides after all reps.']],
       ['Weighted Step-Ups','10 reps per side · 3 to 4 sets · 5 to 10 lbs',['Stand facing your step, a dumbbell in each hand.','Step up, driving through that heel to bring your body up onto the step.','Stand tall, then step down slowly.','Keep your knee over your toes. Switch sides after all reps.']],
-      ['Kickstand RDL','10 reps per side · 3 to 4 sets · 10 lbs',['Working leg forward, other toes lightly down behind like a kickstand, about 70 percent of your weight on the front leg.','Hinge at the hips, sending them back and lowering the weight with a flat back.','Keep the front knee soft and the back toes light for balance only.','Drive through the front heel to stand. Switch sides.']],
+      ['Kickstand RDL','10 reps per side · 3 to 4 sets · 10 lbs',['Working leg forward, other toes lightly down behind like a kickstand, about 70 percent of your weight on the front leg.','Hinge at the hips, sending them back and lowering the weight with a flat back.','Keep the front knee soft and the back toes light for balance only.','Drive through the front heel to stand. Switch sides.'],'prop-sl-rdl-with-ir-focus.mp4'],
       ['Calf Raises','12 to 15 reps · 3 to 4 sets',['Stand tall holding a counter, feet hip-width apart.','Rise up onto the balls of both feet, lifting your heels.','Hold briefly, then lower slowly.','Ease off if the plantar fascia flares.']]
     ]},
     full: { label:'Full Body / Core', ex:[
@@ -1099,14 +1101,15 @@ function strLog(type,base){
   var sets=hepLog[base]||[{}];
   return '<div class="str-log"><div class="str-loghd">Log Sets · Reps &amp; Weight</div><div id="str-sets-'+base+'">'+sets.map(function(s,si){return strSetRow(base,si,s);}).join('')+'</div><button class="str-addset" onclick="strAddSet(\''+base+'\')">+ Add set</button></div>';
 }
-function strRow(prefix,i,name,rx,cues,type){
+function strRow(prefix,i,name,rx,cues,type,video){
   var base=prefix+'-'+todayKey()+'-ex'+i;
   var done=!!hepLog[base+'-done'];
   var cid='str-'+prefix+'-'+i;
-  var body='<ul>'+cues.map(function(c){return '<li>'+c+'</li>';}).join('')+'</ul>'+strLog(type,base);
+  var vid=video?'<div class="str-vid"><video src="'+video+'?v=1" autoplay muted loop playsinline preload="metadata"></video></div>':'';
+  var body=vid+'<ul>'+cues.map(function(c){return '<li>'+c+'</li>';}).join('')+'</ul>'+strLog(type,base);
   return '<div class="str-card"><div class="str-head"><div class="str-circ'+(done?' done':'')+'" onclick="strCheck(event,\''+base+'\',this)">'+(done?'<span style="color:var(--black);font-size:12px;">&#10003;</span>':'')+'</div><div style="flex:1;cursor:pointer;" onclick="strToggle(\''+cid+'\')"><div class="str-name">'+name+'</div><div class="str-meta">'+rx+'</div></div></div><div class="str-body" id="'+cid+'">'+body+'</div></div>';
 }
-function strWorkoutHTML(wid){ return STR.workouts[wid].ex.map(function(e,i){ return strRow(wid,i,e[0],e[1],e[2],'sets'); }).join(''); }
+function strWorkoutHTML(wid){ return STR.workouts[wid].ex.map(function(e,i){ return strRow(wid,i,e[0],e[1],e[2],'sets',e[3]); }).join(''); }
 function strSelect(wid){ hepLog['str-sel']=wid; saveAll(); document.getElementById('str-workout').innerHTML=strWorkoutHTML(wid); }
 function renderStrength(){
   var sel=hepLog['str-sel']||'upper';
